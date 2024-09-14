@@ -79,11 +79,11 @@ This must be at least the length of the longest string matched by
 ‘go-dangling-operators-regexp’ and must be updated whenever that
 constant is changed.")
 
-(defconst go-identifier-regexp "[[:word:][:multibyte:]]+")
-(defconst go-type-name-no-prefix-regexp "\\(?:[[:word:][:multibyte:]]+\\.\\)?[[:word:][:multibyte:]]+")
+(defconst go-identifier-regexp "[[:word:]_[:multibyte:]]+")
+(defconst go-type-name-no-prefix-regexp "\\(?:[[:word:]_[:multibyte:]]+\\.\\)?[[:word:]_[:multibyte:]]+")
 (defconst go-qualified-identifier-regexp (concat go-identifier-regexp "\\." go-identifier-regexp))
 (defconst go-label-regexp go-identifier-regexp)
-(defconst go-type-regexp "[[:word:][:multibyte:]*]+")
+(defconst go-type-regexp "[[:word:]_[:multibyte:]*]+")
 (defconst go-func-regexp (concat "\\_<func\\_>\\s *\\(" go-identifier-regexp "\\)"))
 (defconst go-func-meth-regexp (concat
                                "\\_<func\\_>\\s *\\(?:(\\s *"
@@ -401,8 +401,6 @@ For mode=set, all covered lines will have this weight."
     (modify-syntax-entry ?\' "\"" st)
     (modify-syntax-entry ?`  "\"" st)
     (modify-syntax-entry ?\\ "\\" st)
-    ;; TODO make _ a symbol constituent now that xemacs is gone
-    (modify-syntax-entry ?_  "w" st)
 
     st)
   "Syntax table for Go mode.")
@@ -426,6 +424,8 @@ statements."
   ;; doesn't understand that
   (append
    `(
+     ;; Function (not method) name
+     (,go-func-regexp 1 font-lock-function-name-face)
      ;; Match param lists in func signatures. This uses the
      ;; MATCH-ANCHORED format (see `font-lock-keywords' docs).
      ;;
@@ -467,9 +467,7 @@ statements."
      (,(concat "\\_<" (regexp-opt go-mode-keywords t) "\\_>") . font-lock-keyword-face)
      (,(concat "\\(\\_<" (regexp-opt go-builtins t) "\\_>\\)[[:space:]]*(") 1 font-lock-builtin-face)
      (,(concat "\\_<" (regexp-opt go-constants t) "\\_>") . font-lock-constant-face)
-
-     ;; Function (not method) name
-     (,go-func-regexp 1 font-lock-function-name-face))
+     )
 
    (if go-fontify-function-calls
        ;; Function call/method name
